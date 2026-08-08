@@ -1,0 +1,887 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#0f172a" />
+  <title>Surabaya Smart Drainage AI + Water Level</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+  <style>
+    :root {
+      --bg: #f3f6f8;
+      --card: #ffffff;
+      --ink: #0f172a;
+      --muted: #64748b;
+      --line: #e2e8f0;
+      --navy: #0f172a;
+      --primary: #0369a1;
+      --primary-soft: #e0f2fe;
+      --green: #15803d;
+      --green-soft: #dcfce7;
+      --yellow: #a16207;
+      --yellow-soft: #fef9c3;
+      --orange: #c2410c;
+      --orange-soft: #ffedd5;
+      --red: #b91c1c;
+      --red-soft: #fee2e2;
+      --shadow: 0 14px 38px rgba(15, 23, 42, .08);
+      --radius: 20px;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+    }
+    button, select { font: inherit; }
+    button { cursor: pointer; }
+
+    .app-shell {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 255px minmax(0, 1fr);
+    }
+
+    .sidebar {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      background: var(--navy);
+      color: white;
+      padding: 23px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+    .brand { display: flex; gap: 12px; align-items: center; padding: 2px 6px 8px; }
+    .brand-mark {
+      width: 44px; height: 44px; border-radius: 14px;
+      display: grid; place-items: center;
+      background: linear-gradient(135deg, #0284c7, #22c55e);
+      font-weight: 800;
+      box-shadow: 0 8px 24px rgba(2, 132, 199, .25);
+    }
+    .brand h1 { margin: 0 0 3px; font-size: 15px; }
+    .brand p { margin: 0; color: #94a3b8; font-size: 11px; }
+    .nav-label { margin: 0 9px 8px; font-size: 10px; color: #64748b; font-weight: 800; letter-spacing: .13em; text-transform: uppercase; }
+    .nav-list { display: grid; gap: 5px; }
+    .nav-item {
+      width: 100%; border: 0; background: transparent; color: #cbd5e1;
+      padding: 11px 12px; border-radius: 12px; text-align: left;
+    }
+    .nav-item:hover, .nav-item.active { background: rgba(255,255,255,.08); color: white; }
+    .side-info {
+      margin-top: auto; padding: 14px; border-radius: 16px;
+      border: 1px solid rgba(255,255,255,.08); background: rgba(255,255,255,.04);
+    }
+    .side-info strong { font-size: 12px; }
+    .side-info p { margin: 7px 0 0; font-size: 11px; color: #94a3b8; line-height: 1.6; }
+
+    .main { min-width: 0; padding: 27px; }
+    .topbar { display: flex; justify-content: space-between; gap: 20px; align-items: flex-start; margin-bottom: 20px; }
+    .eyebrow { margin: 0 0 7px; font-size: 11px; font-weight: 800; color: var(--primary); text-transform: uppercase; letter-spacing: .12em; }
+    .topbar h2 { margin: 0; font-size: clamp(25px, 3vw, 35px); letter-spacing: -.04em; }
+    .topbar p { margin: 8px 0 0; color: var(--muted); line-height: 1.65; font-size: 13px; max-width: 780px; }
+    .system-status { display: inline-flex; gap: 8px; align-items: center; padding: 10px 13px; background: white; border: 1px solid var(--line); border-radius: 999px; font-size: 12px; white-space: nowrap; box-shadow: var(--shadow); }
+    .status-dot { width: 8px; height: 8px; border-radius: 999px; background: #94a3b8; }
+    .status-dot.online { background: #22c55e; box-shadow: 0 0 0 4px rgba(34,197,94,.12); }
+
+    .notice { display: none; padding: 14px 16px; border-radius: 14px; margin-bottom: 18px; font-size: 12px; line-height: 1.6; border: 1px solid #fed7aa; background: #fff7ed; color: #9a3412; }
+    .notice.visible { display: block; }
+    .alert-banner { display: none; align-items: center; gap: 12px; padding: 14px 16px; border-radius: 16px; margin-bottom: 18px; border: 1px solid #fecaca; background: #fff1f2; color: #991b1b; }
+    .alert-banner.visible { display: flex; }
+    .alert-icon { width: 34px; height: 34px; border-radius: 10px; display: grid; place-items: center; background: var(--red-soft); font-weight: 800; flex: 0 0 auto; }
+    .alert-banner strong { font-size: 13px; }
+    .alert-banner p { margin: 3px 0 0; font-size: 11px; line-height: 1.5; }
+
+    .metrics { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 14px; margin-bottom: 20px; }
+    .metric { background: white; border: 1px solid var(--line); border-radius: 17px; padding: 16px; box-shadow: var(--shadow); }
+    .metric-top { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+    .metric-label { font-size: 11px; color: var(--muted); font-weight: 700; }
+    .metric-icon { width: 32px; height: 32px; border-radius: 10px; display: grid; place-items: center; background: #f8fafc; }
+    .metric-value { margin-top: 11px; font-size: 25px; font-weight: 800; letter-spacing: -.03em; }
+    .metric-foot { margin-top: 3px; font-size: 10px; color: #94a3b8; }
+
+    .dashboard-grid { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(340px, .85fr); gap: 20px; align-items: start; }
+    .stack { display: grid; gap: 20px; }
+    .card { background: white; border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; }
+    .card-head { padding: 18px 20px; display: flex; justify-content: space-between; align-items: center; gap: 12px; border-bottom: 1px solid var(--line); }
+    .card-title { margin: 0; font-size: 14px; font-weight: 800; }
+    .card-subtitle { margin: 4px 0 0; font-size: 11px; color: var(--muted); }
+    .pill { display: inline-flex; align-items: center; gap: 6px; padding: 7px 9px; border-radius: 999px; border: 1px solid var(--line); background: #f8fafc; color: #475569; font-size: 10px; font-weight: 800; }
+
+    .camera-wrap { position: relative; margin: 0 14px; aspect-ratio: 16 / 9; background: #020617; overflow: hidden; border-radius: 0 0 16px 16px; }
+    #webcam-container, #webcam-container video { width: 100%; height: 100%; }
+    #webcam-container video { display: block; object-fit: contain; transform: none; background: #020617; }
+    .camera-placeholder { position: absolute; inset: 0; display: grid; place-items: center; text-align: center; color: #94a3b8; background: radial-gradient(circle at center, #172033, #020617 70%); }
+    .camera-placeholder.hidden { display: none; }
+    .camera-placeholder strong { display: block; color: #e2e8f0; font-size: 13px; margin-bottom: 5px; }
+    .camera-placeholder span { font-size: 11px; }
+    .camera-icon { width: 58px; height: 58px; border-radius: 18px; display: grid; place-items: center; margin: 0 auto 13px; border: 1px solid #334155; background: #0f172a; font-size: 24px; }
+    .live-badge { position: absolute; top: 13px; left: 13px; display: none; padding: 7px 9px; border-radius: 999px; background: rgba(15,23,42,.78); backdrop-filter: blur(8px); color: white; font-size: 10px; font-weight: 800; }
+    .live-badge.visible { display: block; }
+    .live-badge span { color: #ef4444; }
+    .focus-frame { pointer-events: none; position: absolute; inset: 15%; border: 1px solid rgba(255,255,255,.28); border-radius: 16px; box-shadow: inset 0 0 0 1px rgba(15,23,42,.3); }
+    .camera-controls { display: flex; gap: 9px; padding: 14px; align-items: center; }
+    .btn { border: 0; border-radius: 11px; padding: 10px 13px; font-size: 11px; font-weight: 800; }
+    .btn:disabled { opacity: .5; cursor: not-allowed; }
+    .btn-primary { background: var(--primary); color: white; }
+    .btn-secondary { background: #f1f5f9; color: #334155; border: 1px solid var(--line); }
+    .btn-danger { background: #fee2e2; color: #b91c1c; }
+    .location-select { margin-left: auto; min-width: 220px; border: 1px solid var(--line); border-radius: 11px; padding: 10px 11px; background: white; color: #334155; font-size: 11px; }
+
+    .condition-card { padding: 18px 20px 20px; }
+    .condition-top { display: flex; gap: 14px; align-items: center; }
+    .status-box { width: 84px; height: 84px; border-radius: 20px; display: grid; place-items: center; text-align: center; font-size: 11px; font-weight: 800; background: var(--green-soft); color: var(--green); }
+    .status-box.warning { background: var(--yellow-soft); color: var(--yellow); }
+    .status-box.bad { background: var(--orange-soft); color: var(--orange); }
+    .status-box.critical { background: var(--red-soft); color: var(--red); }
+    .condition-main { min-width: 0; }
+    .condition-main h3 { margin: 0; font-size: 24px; letter-spacing: -.03em; }
+    .condition-main p { margin: 6px 0 0; font-size: 11px; color: var(--muted); line-height: 1.55; }
+    .cause-title { margin: 18px 0 8px; font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: .1em; font-weight: 800; }
+    .cause-list { display: flex; flex-wrap: wrap; gap: 7px; }
+    .cause-chip { display: inline-flex; align-items: center; gap: 6px; padding: 8px 10px; border-radius: 999px; background: #f8fafc; border: 1px solid var(--line); font-size: 11px; font-weight: 700; }
+    .cause-chip.empty { color: #94a3b8; font-weight: 600; }
+    .recommendation { margin-top: 15px; padding: 12px 13px; border-radius: 12px; background: #f8fafc; border: 1px solid var(--line); font-size: 11px; line-height: 1.55; color: #475569; }
+    .recommendation strong { color: #0f172a; }
+
+    .prob-list { display: grid; gap: 10px; padding: 0 20px 20px; }
+    .prob-row { display: grid; grid-template-columns: 100px minmax(0,1fr) 42px; gap: 10px; align-items: center; font-size: 10px; }
+    .prob-name { font-weight: 700; color: #475569; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .bar { height: 7px; background: #f1f5f9; border-radius: 999px; overflow: hidden; }
+    .bar span { display: block; height: 100%; width: 0; border-radius: inherit; background: linear-gradient(90deg, #0284c7, #22c55e); transition: width .18s linear; }
+    .prob-value { text-align: right; color: #64748b; font-weight: 800; }
+
+    #map { height: 360px; }
+    .map-legend { display: flex; flex-wrap: wrap; gap: 7px; padding: 12px 14px 14px; border-top: 1px solid var(--line); }
+    .location-chip { border: 1px solid var(--line); background: white; color: #475569; border-radius: 999px; padding: 8px 10px; font-size: 10px; font-weight: 700; }
+    .location-chip.active { background: var(--primary-soft); color: #075985; border-color: #bae6fd; }
+
+    .priority-list { padding: 8px 14px 14px; display: grid; gap: 9px; }
+    .priority-item { display: grid; grid-template-columns: 32px minmax(0,1fr) auto; align-items: center; gap: 10px; padding: 11px; border: 1px solid var(--line); border-radius: 13px; background: #fff; }
+    .rank { width: 32px; height: 32px; display: grid; place-items: center; border-radius: 10px; background: #f1f5f9; font-size: 11px; font-weight: 800; }
+    .priority-name { margin: 0; font-size: 11px; font-weight: 800; }
+    .priority-detail { margin: 3px 0 0; font-size: 9px; color: var(--muted); line-height: 1.45; }
+    .status-tag { padding: 6px 8px; border-radius: 999px; font-size: 9px; font-weight: 800; background: var(--green-soft); color: var(--green); }
+    .status-tag.warning { background: var(--yellow-soft); color: var(--yellow); }
+    .status-tag.bad { background: var(--orange-soft); color: var(--orange); }
+    .status-tag.critical { background: var(--red-soft); color: var(--red); }
+
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; min-width: 580px; }
+    th, td { text-align: left; padding: 11px 14px; border-top: 1px solid var(--line); font-size: 10px; vertical-align: top; }
+    th { color: #64748b; background: #f8fafc; font-size: 9px; text-transform: uppercase; letter-spacing: .06em; }
+    .empty-row { text-align: center; color: #94a3b8; padding: 22px; }
+
+    .leaflet-popup-content-wrapper { border-radius: 12px; }
+    .leaflet-popup-content { font-family: "Inter", sans-serif; font-size: 11px; line-height: 1.55; }
+
+    @media (max-width: 1080px) {
+      .app-shell { grid-template-columns: 1fr; }
+      .sidebar { position: static; height: auto; flex-direction: row; align-items: center; padding: 14px 18px; }
+      .nav-group, .side-info { display: none; }
+      .brand { padding: 0; }
+      .dashboard-grid { grid-template-columns: 1fr; }
+      .metrics { grid-template-columns: repeat(2, minmax(0,1fr)); }
+    }
+    @media (max-width: 680px) {
+      .main { padding: 18px 12px 30px; }
+      .topbar { flex-direction: column; }
+      .system-status { align-self: flex-start; }
+      .metrics { grid-template-columns: 1fr 1fr; gap: 10px; }
+      .camera-controls { display: grid; grid-template-columns: 1fr 1fr; }
+      .location-select { grid-column: 1 / -1; margin-left: 0; min-width: 0; }
+      .condition-top { align-items: flex-start; }
+      .status-box { width: 70px; height: 70px; border-radius: 17px; }
+      .condition-main h3 { font-size: 21px; }
+      #map { height: 310px; }
+      .prob-row { grid-template-columns: 82px minmax(0,1fr) 40px; }
+    }
+
+    .water-overlay {
+      position: absolute; inset: 0; width: 100%; height: 100%;
+      pointer-events: none; z-index: 3;
+    }
+    #webcam-container { position: absolute; inset: 0; }
+    #webcam-container video { transform: none !important; }
+    .water-readout { margin-top: 18px; padding: 14px; border: 1px solid var(--line); border-radius: 14px; background: #f8fafc; }
+    .water-head { display:flex; justify-content:space-between; gap:12px; align-items:flex-start; margin-bottom:12px; }
+    .water-head strong { display:block; font-size:11px; }
+    .water-head span:not(.pill) { display:block; margin-top:4px; color:var(--muted); font-size:9px; }
+    .water-bars { display:grid; gap:8px; }
+    .water-row { display:grid; grid-template-columns:12px 44px minmax(0,1fr) 48px; gap:8px; align-items:center; font-size:10px; }
+    .water-row b { text-align:right; font-size:9px; color:#475569; }
+    .water-dot { width:9px; height:9px; border-radius:50%; display:block; }
+    .blue-dot { background:#2563eb; } .green-dot { background:#16a34a; } .red-dot { background:#dc2626; }
+    .mini-bar { height:6px; border-radius:99px; background:#e2e8f0; overflow:hidden; }
+    .mini-bar i { display:block; height:100%; width:0; transition:width .15s linear; }
+    #blueLevelBar { background:#2563eb; } #greenLevelBar { background:#16a34a; } #redLevelBar { background:#dc2626; }
+    .water-note { margin:11px 0 0; color:#64748b; font-size:9px; line-height:1.55; }
+
+    .status-box.safe { background:#dbeafe; color:#1d4ed8; }
+    .status-box.standby { background:#dcfce7; color:#15803d; }
+    .status-box.emergency { background:#fee2e2; color:#b91c1c; }
+    .status-box.unknown { background:#f1f5f9; color:#64748b; }
+    .status-tag.safe { background:#dbeafe; color:#1d4ed8; }
+    .status-tag.standby { background:#dcfce7; color:#15803d; }
+    .status-tag.emergency { background:#fee2e2; color:#b91c1c; }
+    .status-tag.unknown { background:#f1f5f9; color:#64748b; }
+
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark">SD</div>
+        <div>
+          <h1>Smart Drainage AI</h1>
+          <p>Surabaya Monitoring System</p>
+        </div>
+      </div>
+
+      <div class="nav-group">
+        <p class="nav-label">Dashboard</p>
+        <div class="nav-list">
+          <button class="nav-item active" onclick="document.getElementById('monitoring').scrollIntoView()">◉ Kamera Drainase</button>
+          <button class="nav-item" onclick="document.getElementById('priority').scrollIntoView()">⚑ Prioritas Penanganan</button>
+          <button class="nav-item" onclick="document.getElementById('locations').scrollIntoView()">⌖ Titik Drainase</button>
+          <button class="nav-item" onclick="document.getElementById('history').scrollIntoView()">≡ Riwayat</button>
+        </div>
+      </div>
+
+      <div class="side-info">
+        <strong>Identifikasi berbasis kamera</strong>
+        <p>Satu kamera menjalankan dua analisis: klasifikasi penyebab penyumbatan dan pembacaan tanda warna ketinggian air pada dinding drainase.</p>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">AI Drainage Condition Monitoring</p>
+          <h2>Monitoring Prioritas Drainase Surabaya</h2>
+          <p>Satu kamera mengidentifikasi material penyebab penyumbatan sekaligus membaca ketinggian air dari tanda biru–hijau–merah pada dinding drainase. Status air menjadi dasar prioritas kunjungan petugas.</p>
+        </div>
+        <div class="system-status">
+          <span id="systemDot" class="status-dot"></span>
+          <span id="systemText">Model belum aktif</span>
+        </div>
+      </header>
+
+      <div id="modelNotice" class="notice"></div>
+      <div id="alertBanner" class="alert-banner">
+        <div class="alert-icon">!</div>
+        <div>
+          <strong id="alertTitle">Status drainase buruk terdeteksi</strong>
+          <p id="alertText"></p>
+        </div>
+      </div>
+
+      <section class="metrics">
+        <article class="metric">
+          <div class="metric-top"><span class="metric-label">Darurat</span><span class="metric-icon">!</span></div>
+          <div id="metricEmergency" class="metric-value">0</div>
+          <div class="metric-foot">Air mencapai zona merah</div>
+        </article>
+        <article class="metric">
+          <div class="metric-top"><span class="metric-label">Siaga</span><span class="metric-icon">⚠</span></div>
+          <div id="metricStandby" class="metric-value">0</div>
+          <div class="metric-foot">Air telah melewati zona biru</div>
+        </article>
+        <article class="metric">
+          <div class="metric-top"><span class="metric-label">Aman</span><span class="metric-icon">✓</span></div>
+          <div id="metricSafe" class="metric-value">3</div>
+          <div class="metric-foot">Zona biru masih terlihat</div>
+        </article>
+        <article class="metric">
+          <div class="metric-top"><span class="metric-label">Titik Dipantau</span><span class="metric-icon">⌖</span></div>
+          <div class="metric-value">3</div>
+          <div class="metric-foot">Demo titik drainase Surabaya</div>
+        </article>
+      </section>
+
+      <section id="monitoring" class="dashboard-grid">
+        <div class="stack">
+          <article class="card">
+            <div class="card-head">
+              <div>
+                <h3 class="card-title">Live Camera Drainase</h3>
+                <p class="card-subtitle">Arahkan kamera ke saluran. Preview memakai frame kamera native penuh (tanpa crop), sedangkan tanda biru–hijau–merah dibaca di dalam ROI.</p>
+              </div>
+              <span id="cameraState" class="pill">OFFLINE</span>
+            </div>
+
+            <div class="camera-wrap">
+              <div id="webcam-container"></div>
+              <canvas id="waterOverlay" class="water-overlay"></canvas>
+              <div id="cameraPlaceholder" class="camera-placeholder">
+                <div>
+                  <div class="camera-icon">◉</div>
+                  <strong>Kamera belum dijalankan</strong>
+                  <span>Klik “Mulai Kamera” untuk memulai pemantauan.</span>
+                </div>
+              </div>
+              <div id="liveBadge" class="live-badge"><span>●</span> LIVE</div>
+              <div id="resolutionBadge" class="pill" style="display:none;position:absolute;right:13px;top:13px;z-index:4;background:rgba(15,23,42,.78);color:#fff;border-color:rgba(255,255,255,.16)">-</div>
+            </div>
+
+            <div class="camera-controls">
+              <button id="startBtn" class="btn btn-primary">Mulai Kamera</button>
+              <button id="stopBtn" class="btn btn-danger" disabled>Stop</button>
+              <select id="locationSelect" class="location-select" aria-label="Pilih titik drainase"></select>
+            </div>
+          </article>
+
+          <article id="locations" class="card">
+            <div class="card-head">
+              <div>
+                <h3 class="card-title">Peta Titik Drainase</h3>
+                <p class="card-subtitle">Warna marker mengikuti status hasil pengamatan kamera.</p>
+              </div>
+              <span class="pill">3 TITIK</span>
+            </div>
+            <div id="map"></div>
+            <div id="locationChips" class="map-legend"></div>
+          </article>
+        </div>
+
+        <div class="stack">
+          <article class="card">
+            <div class="card-head">
+              <div>
+                <h3 class="card-title">Kondisi Drainase Saat Ini</h3>
+                <p class="card-subtitle">Status air dibaca dari marker warna; penyebab penyumbatan dibaca oleh model AI.</p>
+              </div>
+              <span id="lastUpdated" class="pill">Belum ada data</span>
+            </div>
+            <div class="condition-card">
+              <div class="condition-top">
+                <div id="statusBox" class="status-box safe">AMAN</div>
+                <div class="condition-main">
+                  <h3 id="conditionTitle">Status ketinggian air: AMAN</h3>
+                  <p id="conditionLocation">Drainase Jl. Ahmad Yani</p>
+                </div>
+              </div>
+              <div class="water-readout">
+                <div class="water-head">
+                  <div>
+                    <strong>Ketinggian Air dari Marker Warna</strong>
+                    <span>BLUE = Aman · GREEN = Siaga · RED = Darurat</span>
+                  </div>
+                  <span id="waterDetectionState" class="pill">Menunggu kamera</span>
+                </div>
+                <div class="water-bars">
+                  <div class="water-row"><span class="water-dot blue-dot"></span><span>Blue</span><div class="mini-bar"><i id="blueLevelBar"></i></div><b id="blueLevelValue">0.0%</b></div>
+                  <div class="water-row"><span class="water-dot green-dot"></span><span>Green</span><div class="mini-bar"><i id="greenLevelBar"></i></div><b id="greenLevelValue">0.0%</b></div>
+                  <div class="water-row"><span class="water-dot red-dot"></span><span>Red</span><div class="mini-bar"><i id="redLevelBar"></i></div><b id="redLevelValue">0.0%</b></div>
+                </div>
+                <p class="water-note">Logika: Blue masih terlihat → AMAN; Blue tertutup namun Green terlihat → SIAGA; Blue dan Green tertutup namun Red terlihat → DARURAT.</p>
+              </div>
+              <div class="cause-title">Penyebab yang teridentifikasi AI</div>
+              <div id="causeList" class="cause-list"><span class="cause-chip empty">Belum ada temuan</span></div>
+              <div id="recommendation" class="recommendation"><strong>Rekomendasi:</strong> Belum ada tindakan yang diperlukan.</div>
+            </div>
+            <div class="card-head" style="border-top:1px solid var(--line); border-bottom:0; padding-bottom:12px;">
+              <div>
+                <h3 class="card-title">Probabilitas Model</h3>
+                <p class="card-subtitle">Confidence tiap kelas dari frame terakhir.</p>
+              </div>
+              <span id="topPrediction" class="pill">Menunggu</span>
+            </div>
+            <div id="probabilityList" class="prob-list"></div>
+          </article>
+
+          <article id="priority" class="card">
+            <div class="card-head">
+              <div>
+                <h3 class="card-title">Prioritas Kunjungan Petugas</h3>
+                <p class="card-subtitle">DARURAT ditempatkan paling atas, lalu SIAGA dan AMAN; penyebab AI menjadi informasi tindakan.</p>
+              </div>
+              <button id="notifyBtn" class="btn btn-secondary">Aktifkan Notifikasi</button>
+            </div>
+            <div id="priorityList" class="priority-list"></div>
+          </article>
+
+          <article id="history" class="card">
+            <div class="card-head">
+              <div>
+                <h3 class="card-title">Riwayat Temuan</h3>
+                <p class="card-subtitle">Perubahan level air dan deteksi AI dengan confidence ≥ 70% dicatat sementara.</p>
+              </div>
+              <button id="clearHistoryBtn" class="btn btn-secondary">Hapus</button>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Waktu</th>
+                    <th>Drainase</th>
+                    <th>Temuan</th>
+                    <th>Confidence</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody id="historyBody"><tr><td colspan="5" class="empty-row">Belum ada temuan.</td></tr></tbody>
+              </table>
+            </div>
+          </article>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@1.3.1/dist/tf.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@0.8/dist/teachablemachine-image.min.js"></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <script>
+    // ============================================================
+    // MODEL + CAMERA CONFIGURATION
+    // ============================================================
+    const MODEL_URL = "./model/";
+    const MODEL_FILE = MODEL_URL + "model.json";
+    const METADATA_FILE = MODEL_URL + "metadata.json";
+
+    const NEGATIVE_LABELS = ["Background", "Normal", "Bersih"];
+    const TARGET_CLASSES = ["Sampah", "Eceng Gondok", "Daun", "Ranting", "Lumpur"];
+    const TARGET_WITH_BACKGROUND = ["Normal", ...TARGET_CLASSES];
+    const LEGACY_MAP = {
+      "Background": "Normal", "Normal": "Normal", "Bersih": "Normal",
+      "Plastik": "Sampah", "Kertas": "Sampah", "Ranting": "Ranting",
+      "Tumbuhan": "Vegetasi (Eceng Gondok/Daun)"
+    };
+    const CLASS_META = {
+      "Normal": { icon: "○", weight: 0 }, "Sampah": { icon: "♻", weight: 3 },
+      "Eceng Gondok": { icon: "☘", weight: 3 }, "Daun": { icon: "🍂", weight: 2 },
+      "Ranting": { icon: "⌁", weight: 2 }, "Lumpur": { icon: "≈", weight: 4 },
+      "Vegetasi (Eceng Gondok/Daun)": { icon: "☘", weight: 3 }
+    };
+
+    // ============================================================
+    // WATER LEVEL CONFIGURATION - PORT OF THE PYTHON HSV LOGIC
+    // OpenCV hue 0..179. Fungsi rgbToOpenCvHSV() menghasilkan skala yang sama.
+    // ============================================================
+    const MIN_COLOR_PERCENTAGE = 3.0;
+    const COLOR_SAMPLE_STEP = 2;       // 2 = proses setiap 2 piksel agar ringan di browser
+    const WATER_ANALYSIS_INTERVAL = 250; // ms
+    const WATER_SMOOTHING_SAMPLES = 5;
+
+    const HSV_RANGE = {
+      red1:  { hMin: 0,   hMax: 12,  sMin: 70, vMin: 80 },
+      red2:  { hMin: 160, hMax: 179, sMin: 70, vMin: 80 },
+      green: { hMin: 65,  hMax: 100, sMin: 50, vMin: 50 },
+      blue:  { hMin: 101, hMax: 140, sMin: 80, vMin: 50 }
+    };
+
+    // Sama seperti POLYGON_RATIO pada kode Python pengguna.
+    const POLYGON_RATIO = [
+      [0.995, 0.00], [0.995, 0.70], [0.755, 0.985], [0.740, 0.875],
+      [0.790, 0.745], [0.845, 0.610], [0.895, 0.470], [0.945, 0.300],
+      [0.985, 0.150]
+    ];
+
+    const locations = [
+      { id: "ahmad-yani", name: "Drainase Jl. Ahmad Yani", lat: -7.3188, lng: 112.7342, note: "Titik demo koridor Surabaya Selatan" },
+      { id: "mayjen-sungkono", name: "Drainase Jl. Mayjen Sungkono", lat: -7.2916, lng: 112.7217, note: "Titik demo koridor Surabaya Barat" },
+      { id: "merr", name: "Drainase Jl. Ir. Soekarno (MERR)", lat: -7.2843, lng: 112.7819, note: "Titik demo koridor Surabaya Timur" }
+    ];
+
+    const locationState = Object.fromEntries(locations.map(loc => [loc.id, {
+      waterStatus: "safe",
+      waterColors: { blue: 0, green: 0, red: 0 },
+      causes: {},
+      aiScore: 0,
+      lastUpdated: null
+    }]));
+
+    let model = null, modelLabels = [], displayLabels = TARGET_WITH_BACKGROUND;
+    let cameraStream = null, cameraVideo = null, analysisCanvas = null, analysisCtx = null;
+    let isRunning = false, animationId = null;
+    let selectedLocationId = locations[0].id;
+    let map = null, markers = {};
+    let historyItems = [], detectionWindow = [];
+    let lastLoggedKey = "", lastLogTime = 0, lastNotification = {};
+    let lastWaterAnalysis = 0, waterStatusSamples = [], lastLoggedWaterStatus = "safe";
+
+    const WINDOW_MS = 12000;
+    const CONFIDENCE_THRESHOLD = 0.70;
+    const el = id => document.getElementById(id);
+    const startBtn = el("startBtn"), stopBtn = el("stopBtn"), locationSelect = el("locationSelect");
+
+    function currentLocation() { return locations.find(x => x.id === selectedLocationId) || locations[0]; }
+    function normalizeLabel(label) {
+      if (TARGET_CLASSES.includes(label)) return label;
+      if (NEGATIVE_LABELS.includes(label)) return "Normal";
+      return LEGACY_MAP[label] || null;
+    }
+    function aggregatePredictions(predictions) {
+      const aggregated = {};
+      predictions.forEach(item => {
+        const mapped = normalizeLabel(item.className);
+        if (!mapped) return;
+        aggregated[mapped] = (aggregated[mapped] || 0) + item.probability;
+      });
+      return Object.entries(aggregated)
+        .map(([className, probability]) => ({ className, probability: Math.min(probability, 1) }))
+        .sort((a,b) => b.probability - a.probability);
+    }
+    function getDisplayLabels(labels) {
+      const mapped = [];
+      labels.forEach(label => { const n = normalizeLabel(label); if (n && !mapped.includes(n)) mapped.push(n); });
+      return ["Normal","Sampah","Eceng Gondok","Daun","Ranting","Lumpur","Vegetasi (Eceng Gondok/Daun)"].filter(x => mapped.includes(x));
+    }
+    function safeId(text) { return text.replace(/[^a-zA-Z0-9_-]/g, "-"); }
+
+    // ============================================================
+    // WATER LEVEL DETECTION
+    // ============================================================
+    function rgbToOpenCvHSV(r, g, b) {
+      const rn = r / 255, gn = g / 255, bn = b / 255;
+      const max = Math.max(rn, gn, bn), min = Math.min(rn, gn, bn), d = max - min;
+      let hDeg = 0;
+      if (d !== 0) {
+        if (max === rn) hDeg = 60 * (((gn - bn) / d) % 6);
+        else if (max === gn) hDeg = 60 * (((bn - rn) / d) + 2);
+        else hDeg = 60 * (((rn - gn) / d) + 4);
+      }
+      if (hDeg < 0) hDeg += 360;
+      const s = max === 0 ? 0 : (d / max) * 255;
+      return { h: hDeg / 2, s, v: max * 255 };
+    }
+    function inRange(hsv, range) {
+      return hsv.h >= range.hMin && hsv.h <= range.hMax && hsv.s >= range.sMin && hsv.v >= range.vMin;
+    }
+    function pointInPolygon(x, y, polygon) {
+      let inside = false;
+      for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
+        const xi = polygon[i][0], yi = polygon[i][1];
+        const xj = polygon[j][0], yj = polygon[j][1];
+        const intersect = ((yi > y) !== (yj > y)) && (x < ((xj - xi) * (y - yi)) / ((yj - yi) || 1e-9) + xi);
+        if (intersect) inside = !inside;
+      }
+      return inside;
+    }
+    function polygonPixels(width, height) {
+      return POLYGON_RATIO.map(([xr, yr]) => [xr * width, yr * height]);
+    }
+    function getSmoothedWaterStatus(newStatus) {
+      if (newStatus === "unknown") return newStatus;
+      waterStatusSamples.push(newStatus);
+      if (waterStatusSamples.length > WATER_SMOOTHING_SAMPLES) waterStatusSamples.shift();
+      const counts = {};
+      waterStatusSamples.forEach(s => counts[s] = (counts[s] || 0) + 1);
+      return Object.entries(counts).sort((a,b) => b[1] - a[1])[0][0];
+    }
+    function classifyWaterStatus(blueDetected, greenDetected, redDetected) {
+      // Marker dipasang vertikal: BLUE paling bawah, GREEN tengah, RED paling atas.
+      // Air naik menutup marker dari bawah ke atas.
+      if (blueDetected) return "safe";
+      if (greenDetected) return "standby";
+      if (redDetected) return "emergency";
+      return "unknown";
+    }
+    function analyzeWaterLevel(canvas) {
+      if (!canvas || !canvas.width || !canvas.height) return;
+      const now = performance.now();
+      if (now - lastWaterAnalysis < WATER_ANALYSIS_INTERVAL) return;
+      lastWaterAnalysis = now;
+
+      const w = canvas.width, h = canvas.height;
+      const ctx = canvas.getContext("2d", { willReadFrequently: true });
+      const img = ctx.getImageData(0, 0, w, h).data;
+      const poly = polygonPixels(w, h);
+      let roi = 0, blue = 0, green = 0, red = 0;
+
+      let minX = w, minY = h, maxX = 0, maxY = 0;
+      poly.forEach(([x,y]) => { minX = Math.min(minX,x); maxX = Math.max(maxX,x); minY = Math.min(minY,y); maxY = Math.max(maxY,y); });
+      minX = Math.max(0, Math.floor(minX)); maxX = Math.min(w-1, Math.ceil(maxX));
+      minY = Math.max(0, Math.floor(minY)); maxY = Math.min(h-1, Math.ceil(maxY));
+
+      for (let y = minY; y <= maxY; y += COLOR_SAMPLE_STEP) {
+        for (let x = minX; x <= maxX; x += COLOR_SAMPLE_STEP) {
+          if (!pointInPolygon(x, y, poly)) continue;
+          roi++;
+          const idx = (y * w + x) * 4;
+          const hsv = rgbToOpenCvHSV(img[idx], img[idx+1], img[idx+2]);
+          if (inRange(hsv, HSV_RANGE.red1) || inRange(hsv, HSV_RANGE.red2)) red++;
+          if (inRange(hsv, HSV_RANGE.green)) green++;
+          if (inRange(hsv, HSV_RANGE.blue)) blue++;
+        }
+      }
+
+      const pct = {
+        blue: roi ? (blue / roi) * 100 : 0,
+        green: roi ? (green / roi) * 100 : 0,
+        red: roi ? (red / roi) * 100 : 0
+      };
+      const detected = {
+        blue: pct.blue >= MIN_COLOR_PERCENTAGE,
+        green: pct.green >= MIN_COLOR_PERCENTAGE,
+        red: pct.red >= MIN_COLOR_PERCENTAGE
+      };
+      const rawStatus = classifyWaterStatus(detected.blue, detected.green, detected.red);
+      const status = getSmoothedWaterStatus(rawStatus);
+
+      const state = locationState[selectedLocationId];
+      state.waterStatus = status;
+      state.waterColors = pct;
+      state.lastUpdated = new Date();
+      updateWaterUI(pct, detected, status);
+      drawWaterOverlay(canvas, poly, detected, status);
+      maybeLogWaterStatus(status, pct);
+      updateLocationOutputs();
+    }
+    function drawWaterOverlay(sourceCanvas, poly, detected, status) {
+      const overlay = el("waterOverlay");
+      if (overlay.width !== sourceCanvas.width) overlay.width = sourceCanvas.width;
+      if (overlay.height !== sourceCanvas.height) overlay.height = sourceCanvas.height;
+      const ctx = overlay.getContext("2d");
+      ctx.clearRect(0,0,overlay.width,overlay.height);
+      ctx.save();
+      ctx.beginPath();
+      poly.forEach(([x,y],i) => i ? ctx.lineTo(x,y) : ctx.moveTo(x,y));
+      ctx.closePath();
+      ctx.fillStyle = "rgba(250,204,21,.07)";
+      ctx.fill();
+      ctx.strokeStyle = "#facc15";
+      ctx.lineWidth = 3;
+      ctx.stroke();
+      const label = waterStatusLabel(status);
+      ctx.font = "700 16px Inter, sans-serif";
+      const boxW = Math.max(150, ctx.measureText(label).width + 34);
+      ctx.fillStyle = "rgba(15,23,42,.82)";
+      ctx.fillRect(14,14,boxW,40);
+      ctx.fillStyle = status === "emergency" ? "#ef4444" : status === "standby" ? "#22c55e" : status === "safe" ? "#3b82f6" : "#cbd5e1";
+      ctx.fillText("AIR: " + label, 28, 40);
+      ctx.restore();
+    }
+    function updateWaterUI(pct, detected, status) {
+      [["blue",pct.blue],["green",pct.green],["red",pct.red]].forEach(([name,val]) => {
+        el(name + "LevelBar").style.width = `${Math.min(100,val).toFixed(1)}%`;
+        el(name + "LevelValue").textContent = `${val.toFixed(1)}%`;
+      });
+      const seen = [detected.blue && "BLUE", detected.green && "GREEN", detected.red && "RED"].filter(Boolean);
+      el("waterDetectionState").textContent = !isRunning ? "NORMAL / MENUNGGU KAMERA" : (seen.length ? seen.join(" + ") : "MARKER TIDAK TERBACA");
+    }
+
+    // ============================================================
+    // STATUS + PRIORITY
+    // ============================================================
+    function waterSeverity(status) { return ({ unknown:0, safe:1, standby:2, emergency:3 })[status] || 0; }
+    function waterStatusLabel(status) { return ({ unknown:"BELUM TERBACA", safe:"AMAN", standby:"SIAGA", emergency:"DARURAT" })[status] || "BELUM TERBACA"; }
+    function markerColor(status) { return ({ unknown:"#94a3b8", safe:"#2563eb", standby:"#16a34a", emergency:"#dc2626" })[status] || "#94a3b8"; }
+    function recommendationFor(state) {
+      const causes = Object.keys(state.causes);
+      const causeText = causes.length ? causes.join(", ") : "belum ada penyebab yang teridentifikasi AI";
+      if (state.waterStatus === "emergency") return `Segera kirim petugas. Ketinggian air berada pada status DARURAT. Penyebab kamera: ${causeText}.`;
+      if (state.waterStatus === "standby") return `Masukkan lokasi ke daftar inspeksi prioritas. Ketinggian air SIAGA. Penyebab kamera: ${causeText}.`;
+      if (state.waterStatus === "safe" && causes.length) return `Ketinggian air masih AMAN, tetapi terdeteksi ${causeText}. Lakukan pembersihan preventif sebelum terjadi peningkatan muka air.`;
+      if (state.waterStatus === "safe") return "Ketinggian air AMAN dan belum ada penyebab penyumbatan signifikan yang terdeteksi.";
+      return "Marker ketinggian air belum terbaca dengan baik. Pastikan ROI dan tanda warna terlihat oleh kamera.";
+    }
+
+    function markerIcon(status) {
+      const color = markerColor(status);
+      return L.divIcon({ className:"", html:`<div style="width:18px;height:18px;border-radius:50%;background:${color};border:3px solid white;box-shadow:0 3px 10px rgba(15,23,42,.35)"></div>`, iconSize:[18,18], iconAnchor:[9,9] });
+    }
+    function setupLocationOptions() { locationSelect.innerHTML = locations.map(loc => `<option value="${loc.id}">${loc.name}</option>`).join(""); }
+    function setSelectedLocation(id, panMap=true) {
+      if (!locationState[id]) return;
+      selectedLocationId = id; detectionWindow = []; waterStatusSamples = []; lastLoggedWaterStatus = locationState[id].waterStatus;
+      locationSelect.value = id; renderCurrentCondition(); renderLocationChips(); updateWaterUI(locationState[id].waterColors, {blue:false,green:false,red:false}, locationState[id].waterStatus);
+      if (panMap && map) { const loc = currentLocation(); map.flyTo([loc.lat,loc.lng],Math.max(map.getZoom(),13),{duration:.6}); markers[id]?.openPopup(); }
+    }
+    function initMap() {
+      map = L.map("map",{zoomControl:true}).setView([-7.294,112.746],12);
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19,attribution:"&copy; OpenStreetMap contributors"}).addTo(map);
+      locations.forEach(loc => { const m = L.marker([loc.lat,loc.lng],{icon:markerIcon("safe")}).addTo(map); m.on("click",()=>setSelectedLocation(loc.id,false)); markers[loc.id]=m; updateMarker(loc.id); });
+      renderLocationChips();
+    }
+    function updateMarker(id) {
+      const loc=locations.find(x=>x.id===id), state=locationState[id], marker=markers[id]; if(!loc||!state||!marker)return;
+      const causes=Object.keys(state.causes); marker.setIcon(markerIcon(state.waterStatus));
+      marker.bindPopup(`<strong>${loc.name}</strong><br>${loc.note}<br>Status air: <strong>${waterStatusLabel(state.waterStatus)}</strong><br>Penyebab AI: ${causes.length?causes.join(", "):"Belum ada"}`);
+    }
+    function renderLocationChips() {
+      el("locationChips").innerHTML = locations.map(loc=>`<button class="location-chip ${loc.id===selectedLocationId?"active":""}" data-location="${loc.id}">${loc.name} · ${waterStatusLabel(locationState[loc.id].waterStatus)}</button>`).join("");
+      document.querySelectorAll("[data-location]").forEach(btn=>btn.addEventListener("click",()=>setSelectedLocation(btn.dataset.location)));
+    }
+    function renderCurrentCondition() {
+      const loc=currentLocation(), state=locationState[selectedLocationId], causes=Object.keys(state.causes), box=el("statusBox");
+      box.className=`status-box ${state.waterStatus}`; box.textContent=waterStatusLabel(state.waterStatus);
+      el("conditionLocation").textContent=loc.name;
+      el("conditionTitle").textContent = state.waterStatus === "unknown" ? "Menunggu pembacaan marker ketinggian air" : `Status ketinggian air: ${waterStatusLabel(state.waterStatus)}`;
+      el("causeList").innerHTML = causes.length ? causes.map(name=>`<span class="cause-chip">${CLASS_META[name]?.icon||"•"} ${name} · ${(state.causes[name]*100).toFixed(0)}%</span>`).join("") : `<span class="cause-chip empty">Belum ada penyebab penyumbatan terdeteksi</span>`;
+      el("recommendation").innerHTML=`<strong>Rekomendasi:</strong> ${recommendationFor(state)}`;
+    }
+    function renderPriority() {
+      const sorted=[...locations].sort((a,b)=>{
+        const sa=locationState[a.id], sb=locationState[b.id];
+        return waterSeverity(sb.waterStatus)-waterSeverity(sa.waterStatus) || sb.aiScore-sa.aiScore;
+      });
+      el("priorityList").innerHTML=sorted.map((loc,idx)=>{
+        const s=locationState[loc.id], causes=Object.keys(s.causes);
+        return `<div class="priority-item"><div class="rank">${idx+1}</div><div><p class="priority-name">${loc.name}</p><p class="priority-detail">Air: ${waterStatusLabel(s.waterStatus)} · ${causes.length?`Penyebab: ${causes.join(", ")}`:"Belum ada penyebab AI"}</p></div><span class="status-tag ${s.waterStatus}">${waterStatusLabel(s.waterStatus)}</span></div>`;
+      }).join("");
+    }
+    function renderMetrics(){ const s=Object.values(locationState); el("metricEmergency").textContent=s.filter(x=>x.waterStatus==="emergency").length; el("metricStandby").textContent=s.filter(x=>x.waterStatus==="standby").length; el("metricSafe").textContent=s.filter(x=>x.waterStatus==="safe").length; }
+    function updateLocationOutputs(){ updateMarker(selectedLocationId); renderCurrentCondition(); renderLocationChips(); renderPriority(); renderMetrics(); maybeAlert(); }
+
+    // ============================================================
+    // AI MODEL
+    // ============================================================
+    function renderProbabilityRows(labels){ el("probabilityList").innerHTML=labels.map(label=>`<div class="prob-row"><span class="prob-name">${label}</span><div class="bar"><span id="bar-${safeId(label)}"></span></div><span class="prob-value" id="value-${safeId(label)}">0%</span></div>`).join(""); }
+    function modelCompatibilityNotice(labels){
+      const notice=el("modelNotice"), hasLegacy=labels.some(l=>["Tumbuhan","Plastik","Kertas"].includes(l)), hasFull=TARGET_CLASSES.every(l=>labels.includes(l));
+      if(hasLegacy||hasFull){ notice.classList.remove("visible"); notice.innerHTML=""; return; }
+      notice.innerHTML="<strong>Model berhasil dimuat.</strong><br>Beberapa label model tidak dikenali dan akan diabaikan."; notice.classList.add("visible");
+    }
+    async function loadModel(){
+      if(model)return model; el("systemText").textContent="Memuat model...";
+      try{ model=await tmImage.load(MODEL_FILE,METADATA_FILE); modelLabels=model.getClassLabels?model.getClassLabels():[]; displayLabels=getDisplayLabels(modelLabels); renderProbabilityRows(displayLabels); modelCompatibilityNotice(modelLabels); el("systemDot").classList.add("online"); el("systemText").textContent="AI + water level siap"; return model; }
+      catch(err){ console.error(err); el("systemText").textContent="Model gagal dimuat"; el("modelNotice").textContent="Model tidak dapat dimuat. Jalankan via localhost/HTTPS dan pastikan folder model tersedia."; el("modelNotice").classList.add("visible"); throw err; }
+    }
+    function waitForVideoMetadata(video){
+      return new Promise((resolve,reject)=>{
+        if(video.readyState >= 1 && video.videoWidth) return resolve();
+        const timeout=setTimeout(()=>reject(new Error("Metadata kamera tidak tersedia.")),8000);
+        video.addEventListener("loadedmetadata",()=>{clearTimeout(timeout);resolve();},{once:true});
+        video.addEventListener("error",()=>{clearTimeout(timeout);reject(new Error("Video kamera gagal dimuat."));},{once:true});
+      });
+    }
+    function buildNativeCameraConstraints(){
+      const supported=navigator.mediaDevices?.getSupportedConstraints?.()||{};
+      const video={
+        facingMode:{ideal:"environment"},
+        width:{ideal:1920},
+        height:{ideal:1080},
+        aspectRatio:{ideal:16/9},
+        frameRate:{ideal:30,max:30}
+      };
+      // Minta frame native tanpa crop-and-scale jika browser mendukungnya.
+      if(supported.resizeMode) video.resizeMode={ideal:"none"};
+      return {audio:false,video};
+    }
+    function setupAnalysisCanvas(video){
+      const nativeW=video.videoWidth||1280, nativeH=video.videoHeight||720;
+      // Analisis dibatasi 1280px agar HSV tetap ringan, tetapi FOV tetap utuh.
+      const maxW=1280;
+      const scale=Math.min(1,maxW/nativeW);
+      analysisCanvas=document.createElement("canvas");
+      analysisCanvas.width=Math.max(1,Math.round(nativeW*scale));
+      analysisCanvas.height=Math.max(1,Math.round(nativeH*scale));
+      analysisCtx=analysisCanvas.getContext("2d",{willReadFrequently:true});
+      const wrap=document.querySelector(".camera-wrap");
+      if(wrap && nativeW && nativeH) wrap.style.aspectRatio=`${nativeW} / ${nativeH}`;
+    }
+    async function startCamera(){
+      if(isRunning)return; startBtn.disabled=true; startBtn.textContent="Menyiapkan...";
+      try{
+        await loadModel();
+        if(!navigator.mediaDevices?.getUserMedia) throw new Error("Browser tidak mendukung getUserMedia().");
+
+        // Gunakan video native browser, BUKAN tmImage.Webcam. tmImage.Webcam melakukan crop ke canvas.
+        cameraStream=await navigator.mediaDevices.getUserMedia(buildNativeCameraConstraints());
+        cameraVideo=document.createElement("video");
+        cameraVideo.autoplay=true; cameraVideo.muted=true; cameraVideo.playsInline=true; cameraVideo.setAttribute("playsinline","");
+        cameraVideo.srcObject=cameraStream;
+        await waitForVideoMetadata(cameraVideo);
+        await cameraVideo.play();
+        setupAnalysisCanvas(cameraVideo);
+
+        el("webcam-container").innerHTML="";
+        el("webcam-container").appendChild(cameraVideo);
+
+        const track=cameraStream.getVideoTracks()[0];
+        const settings=track?.getSettings?.()||{};
+        const rw=settings.width||cameraVideo.videoWidth, rh=settings.height||cameraVideo.videoHeight;
+        el("resolutionBadge").textContent=`${rw}×${rh}`;
+        el("resolutionBadge").style.display="inline-flex";
+
+        isRunning=true;
+        el("cameraPlaceholder").classList.add("hidden"); el("liveBadge").classList.add("visible"); el("cameraState").textContent="ONLINE";
+        startBtn.textContent="Kamera Aktif"; stopBtn.disabled=false; loop();
+      }catch(err){
+        console.error(err);
+        stopCamera();
+        startBtn.disabled=false; startBtn.textContent="Mulai Kamera"; el("cameraState").textContent="OFFLINE";
+        el("modelNotice").textContent = location.protocol==="file:"
+          ? "Akses kamera diblokir dari file://. Jalankan melalui localhost/HTTPS."
+          : `Kamera gagal dibuka: ${err.message||err}`;
+        el("modelNotice").classList.add("visible");
+      }
+    }
+    function stopCamera(){
+      isRunning=false; if(animationId)cancelAnimationFrame(animationId); animationId=null;
+      if(cameraStream){cameraStream.getTracks().forEach(track=>track.stop());cameraStream=null;}
+      if(cameraVideo){cameraVideo.pause();cameraVideo.srcObject=null;cameraVideo=null;}
+      analysisCanvas=null; analysisCtx=null;
+      el("webcam-container").innerHTML=""; el("waterOverlay").getContext("2d").clearRect(0,0,el("waterOverlay").width,el("waterOverlay").height);
+      el("resolutionBadge").style.display="none";
+      el("cameraPlaceholder").classList.remove("hidden"); el("liveBadge").classList.remove("visible"); el("cameraState").textContent="OFFLINE"; startBtn.disabled=false; startBtn.textContent="Mulai Kamera"; stopBtn.disabled=true;
+    }
+    async function loop(){
+      if(!isRunning||!cameraVideo||!analysisCanvas||!analysisCtx||!model)return;
+      if(cameraVideo.readyState>=2){
+        // drawImage(source, 0, 0, width, height) mempertahankan seluruh frame; tidak ada source crop.
+        analysisCtx.drawImage(cameraVideo,0,0,analysisCanvas.width,analysisCanvas.height);
+        analyzeWaterLevel(analysisCanvas);
+        await predict();
+      }
+      animationId=requestAnimationFrame(loop);
+    }
+    async function predict(){
+      // Teachable Machine menerima HTMLVideoElement langsung. Preview tetap full-frame.
+      const raw=await model.predict(cameraVideo), prediction=aggregatePredictions(raw);
+      displayLabels.forEach(label=>{ const item=prediction.find(p=>p.className===label), pct=(item?.probability||0)*100, bar=el(`bar-${safeId(label)}`), val=el(`value-${safeId(label)}`); if(bar)bar.style.width=`${pct.toFixed(1)}%`; if(val)val.textContent=`${pct.toFixed(0)}%`; });
+      const best=prediction[0]||{className:"Normal",probability:0}; el("topPrediction").textContent=`${best.className} · ${(best.probability*100).toFixed(1)}%`; el("lastUpdated").textContent=new Date().toLocaleTimeString("id-ID",{hour:"2-digit",minute:"2-digit",second:"2-digit"}); collectDetection(best);
+    }
+    function collectDetection(best){
+      const now=Date.now(); detectionWindow=detectionWindow.filter(item=>now-item.time<=WINDOW_MS);
+      if(best.probability>=CONFIDENCE_THRESHOLD && best.className!=="Normal"){ detectionWindow.push({time:now,className:best.className,probability:best.probability}); maybeLogDetection(best); }
+      const causes={}; detectionWindow.forEach(item=>{ if(!causes[item.className]||item.probability>causes[item.className])causes[item.className]=item.probability; });
+      const state=locationState[selectedLocationId]; state.causes=causes; state.aiScore=Object.keys(causes).reduce((sum,name)=>sum+(CLASS_META[name]?.weight||1),0); state.lastUpdated=new Date(); updateLocationOutputs();
+    }
+
+    // ============================================================
+    // HISTORY + NOTIFICATIONS
+    // ============================================================
+    function maybeLogDetection(best){
+      const now=Date.now(), key=`${selectedLocationId}|AI|${best.className}`; if(key===lastLoggedKey&&now-lastLogTime<5000)return;
+      historyItems.unshift({time:new Date(),location:currentLocation().name,className:best.className,confidence:`${(best.probability*100).toFixed(1)}%`,status:waterStatusLabel(locationState[selectedLocationId].waterStatus)}); historyItems=historyItems.slice(0,40); lastLoggedKey=key; lastLogTime=now; renderHistory();
+    }
+    function maybeLogWaterStatus(status,pct){
+      if(status==="unknown"||status===lastLoggedWaterStatus)return; lastLoggedWaterStatus=status;
+      historyItems.unshift({time:new Date(),location:currentLocation().name,className:`Level Air ${waterStatusLabel(status)}`,confidence:`B ${pct.blue.toFixed(1)} · G ${pct.green.toFixed(1)} · R ${pct.red.toFixed(1)}`,status:waterStatusLabel(status)}); historyItems=historyItems.slice(0,40); renderHistory();
+    }
+    function renderHistory(){
+      if(!historyItems.length){el("historyBody").innerHTML='<tr><td colspan="5" class="empty-row">Belum ada temuan.</td></tr>';return;}
+      el("historyBody").innerHTML=historyItems.map(item=>`<tr><td>${item.time.toLocaleTimeString("id-ID")}</td><td>${item.location}</td><td><strong>${item.className}</strong></td><td>${item.confidence}</td><td>${item.status}</td></tr>`).join("");
+    }
+    function maybeAlert(){
+      const loc=currentLocation(), state=locationState[selectedLocationId], banner=el("alertBanner");
+      if(!["standby","emergency"].includes(state.waterStatus)){banner.classList.remove("visible");return;}
+      const causes=Object.keys(state.causes); el("alertTitle").textContent=`${waterStatusLabel(state.waterStatus)} · ${loc.name}`;
+      el("alertText").textContent=`Ketinggian air ${waterStatusLabel(state.waterStatus)}.${causes.length?` Penyebab teridentifikasi: ${causes.join(", ")}.`:" Penyebab belum teridentifikasi AI."}`; banner.classList.add("visible");
+      const now=Date.now(), key=`${selectedLocationId}-${state.waterStatus}`;
+      if(Notification.permission==="granted"&&(!lastNotification[key]||now-lastNotification[key]>30000)){ new Notification(`Drainase ${waterStatusLabel(state.waterStatus)} - Surabaya`,{body:`${loc.name}. ${causes.length?`Penyebab: ${causes.join(", ")}`:"Segera cek kondisi drainase."}`}); lastNotification[key]=now; }
+    }
+    async function enableNotifications(){ if(!("Notification" in window)){el("notifyBtn").textContent="Notifikasi tidak didukung";return;} const p=await Notification.requestPermission(); el("notifyBtn").textContent=p==="granted"?"Notifikasi Aktif":"Notifikasi Ditolak"; }
+
+    startBtn.addEventListener("click",startCamera); stopBtn.addEventListener("click",stopCamera); locationSelect.addEventListener("change",e=>setSelectedLocation(e.target.value));
+    el("clearHistoryBtn").addEventListener("click",()=>{historyItems=[];renderHistory();}); el("notifyBtn").addEventListener("click",enableNotifications); window.addEventListener("beforeunload",stopCamera);
+
+    setupLocationOptions(); initMap(); renderCurrentCondition(); renderPriority(); renderMetrics(); renderProbabilityRows(displayLabels); setSelectedLocation(locations[0].id,false);
+  </script>
+</body>
+</html>
