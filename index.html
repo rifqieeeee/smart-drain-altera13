@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -252,16 +252,16 @@
       <div class="nav-group">
         <p class="nav-label">Dashboard</p>
         <div class="nav-list">
-          <button class="nav-item active" onclick="document.getElementById('monitoring').scrollIntoView()">◉ Kamera Drainase</button>
-          <button class="nav-item" onclick="document.getElementById('priority').scrollIntoView()">⚑ Prioritas Penanganan</button>
-          <button class="nav-item" onclick="document.getElementById('locations').scrollIntoView()">⌖ Titik Drainase</button>
-          <button class="nav-item" onclick="document.getElementById('history').scrollIntoView()">≡ Riwayat</button>
+          <button class="nav-item active" onclick="document.getElementById('monitoring').scrollIntoView()">◉ Drainage Camera</button>
+          <button class="nav-item" onclick="document.getElementById('priority').scrollIntoView()">⚑ Response Priorities</button>
+          <button class="nav-item" onclick="document.getElementById('locations').scrollIntoView()">⌖ Drainage Locations</button>
+          <button class="nav-item" onclick="document.getElementById('history').scrollIntoView()">≡ History</button>
         </div>
       </div>
 
       <div class="side-info">
-        <strong>Identifikasi berbasis kamera</strong>
-        <p>Satu kamera menjalankan dua analisis: klasifikasi penyebab penyumbatan dan pembacaan tanda warna ketinggian air pada dinding drainase.</p>
+        <strong>Camera-based identification</strong>
+        <p>One camera performs two analyses: classifying blockage causes and reading colored water-level markers on the drainage wall.</p>
       </div>
     </aside>
 
@@ -269,12 +269,12 @@
       <header class="topbar">
         <div>
           <p class="eyebrow">AI Drainage Condition Monitoring</p>
-          <h2>Monitoring Prioritas Drainase Surabaya</h2>
-          <p>Satu kamera mengidentifikasi material penyebab penyumbatan sekaligus membaca ketinggian air dari tanda biru–hijau–merah pada dinding drainase. Status air menjadi dasar prioritas kunjungan petugas.</p>
+          <h2>Surabaya Drainage Priority Monitoring</h2>
+          <p>A single camera identifies blockage materials and reads water levels from blue, green, and red markers on the drainage wall. Water status determines inspection priority.</p>
         </div>
         <div class="system-status">
           <span id="systemDot" class="status-dot"></span>
-          <span id="systemText">Model belum aktif</span>
+          <span id="systemText">Model inactive</span>
         </div>
       </header>
 
@@ -282,31 +282,31 @@
       <div id="alertBanner" class="alert-banner">
         <div class="alert-icon">!</div>
         <div>
-          <strong id="alertTitle">Status drainase buruk terdeteksi</strong>
+          <strong id="alertTitle">Poor drainage condition detected</strong>
           <p id="alertText"></p>
         </div>
       </div>
 
       <section class="metrics">
         <article class="metric">
-          <div class="metric-top"><span class="metric-label">Darurat</span><span class="metric-icon">!</span></div>
+          <div class="metric-top"><span class="metric-label">Emergency</span><span class="metric-icon">!</span></div>
           <div id="metricEmergency" class="metric-value">0</div>
-          <div class="metric-foot">Air mencapai zona merah</div>
+          <div class="metric-foot">Water has reached the red zone</div>
         </article>
         <article class="metric">
-          <div class="metric-top"><span class="metric-label">Siaga</span><span class="metric-icon">⚠</span></div>
+          <div class="metric-top"><span class="metric-label">Alert</span><span class="metric-icon">⚠</span></div>
           <div id="metricStandby" class="metric-value">0</div>
-          <div class="metric-foot">Air telah melewati zona biru</div>
+          <div class="metric-foot">Water has passed the blue zone</div>
         </article>
         <article class="metric">
-          <div class="metric-top"><span class="metric-label">Aman</span><span class="metric-icon">✓</span></div>
+          <div class="metric-top"><span class="metric-label">Safe</span><span class="metric-icon">✓</span></div>
           <div id="metricSafe" class="metric-value">3</div>
-          <div class="metric-foot">Zona biru masih terlihat</div>
+          <div class="metric-foot">Blue zone is still visible</div>
         </article>
         <article class="metric">
-          <div class="metric-top"><span class="metric-label">Titik Dipantau</span><span class="metric-icon">⌖</span></div>
+          <div class="metric-top"><span class="metric-label">Locations Monitored</span><span class="metric-icon">⌖</span></div>
           <div class="metric-value">3</div>
-          <div class="metric-foot">Demo titik drainase Surabaya</div>
+          <div class="metric-foot">Surabaya drainage demo locations</div>
         </article>
       </section>
 
@@ -315,8 +315,8 @@
           <article class="card">
             <div class="card-head">
               <div>
-                <h3 class="card-title">Live Camera Drainase</h3>
-                <p class="card-subtitle">Arahkan kamera ke saluran. Preview memakai frame kamera native penuh (tanpa crop), sedangkan tanda biru–hijau–merah dibaca di dalam ROI.</p>
+                <h3 class="card-title">Live Drainage Camera</h3>
+                <p class="card-subtitle">Point the camera at the drain. The preview shows the full camera frame without cropping; blue, green, and red markers are read within the ROI.</p>
               </div>
               <span id="cameraState" class="pill">OFFLINE</span>
             </div>
@@ -327,8 +327,8 @@
               <div id="cameraPlaceholder" class="camera-placeholder">
                 <div>
                   <div class="camera-icon">◉</div>
-                  <strong>Kamera belum dijalankan</strong>
-                  <span>Klik “Mulai Kamera” untuk memulai pemantauan.</span>
+                  <strong>Camera is not running</strong>
+                  <span>Click “Start Camera” to begin monitoring.</span>
                 </div>
               </div>
               <div id="liveBadge" class="live-badge"><span>●</span> LIVE</div>
@@ -336,19 +336,19 @@
             </div>
 
             <div class="camera-controls">
-              <button id="startBtn" class="btn btn-primary">Mulai Kamera</button>
+              <button id="startBtn" class="btn btn-primary">Start Camera</button>
               <button id="stopBtn" class="btn btn-danger" disabled>Stop</button>
-              <select id="locationSelect" class="location-select" aria-label="Pilih titik drainase"></select>
+              <select id="locationSelect" class="location-select" aria-label="Select a drainage location"></select>
             </div>
           </article>
 
           <article id="locations" class="card">
             <div class="card-head">
               <div>
-                <h3 class="card-title">Peta Titik Drainase</h3>
-                <p class="card-subtitle">Warna marker mengikuti status hasil pengamatan kamera.</p>
+                <h3 class="card-title">Drainage Location Map</h3>
+                <p class="card-subtitle">Marker colors reflect the status observed by the camera.</p>
               </div>
-              <span class="pill">3 TITIK</span>
+              <span class="pill">3 LOCATIONS</span>
             </div>
             <div id="map"></div>
             <div id="locationChips" class="map-legend"></div>
@@ -359,44 +359,44 @@
           <article class="card">
             <div class="card-head">
               <div>
-                <h3 class="card-title">Kondisi Drainase Saat Ini</h3>
-                <p class="card-subtitle">Status air dibaca dari marker warna; penyebab penyumbatan dibaca oleh model AI.</p>
+                <h3 class="card-title">Current Drainage Condition</h3>
+                <p class="card-subtitle">Water status is read from colored markers; blockage causes are identified by the AI model.</p>
               </div>
-              <span id="lastUpdated" class="pill">Belum ada data</span>
+              <span id="lastUpdated" class="pill">No data yet</span>
             </div>
             <div class="condition-card">
               <div class="condition-top">
-                <div id="statusBox" class="status-box safe">AMAN</div>
+                <div id="statusBox" class="status-box safe">SAFE</div>
                 <div class="condition-main">
-                  <h3 id="conditionTitle">Status ketinggian air: AMAN</h3>
-                  <p id="conditionLocation">Drainase Jl. Ahmad Yani</p>
+                  <h3 id="conditionTitle">Water level status: SAFE</h3>
+                  <p id="conditionLocation">Drainage on Jl. Ahmad Yani</p>
                 </div>
               </div>
               <div class="water-readout">
                 <div class="water-head">
                   <div>
-                    <strong>Ketinggian Air dari Marker Warna</strong>
-                    <span>BLUE = Aman · GREEN = Siaga · RED = Darurat</span>
+                    <strong>Water Level from Color Markers</strong>
+                    <span>BLUE = Safe · GREEN = Alert · RED = Emergency</span>
                   </div>
-                  <span id="waterDetectionState" class="pill">Menunggu kamera</span>
+                  <span id="waterDetectionState" class="pill">Waiting for camera</span>
                 </div>
                 <div class="water-bars">
                   <div class="water-row"><span class="water-dot blue-dot"></span><span>Blue</span><div class="mini-bar"><i id="blueLevelBar"></i></div><b id="blueLevelValue">0.0%</b></div>
                   <div class="water-row"><span class="water-dot green-dot"></span><span>Green</span><div class="mini-bar"><i id="greenLevelBar"></i></div><b id="greenLevelValue">0.0%</b></div>
                   <div class="water-row"><span class="water-dot red-dot"></span><span>Red</span><div class="mini-bar"><i id="redLevelBar"></i></div><b id="redLevelValue">0.0%</b></div>
                 </div>
-                <p class="water-note">Logika: Blue masih terlihat → AMAN; Blue tertutup namun Green terlihat → SIAGA; Blue dan Green tertutup namun Red terlihat → DARURAT.</p>
+                <p class="water-note">Logic: Blue visible → SAFE; blue covered and green visible → ALERT; blue and green covered and red visible → EMERGENCY.</p>
               </div>
-              <div class="cause-title">Penyebab yang teridentifikasi AI</div>
-              <div id="causeList" class="cause-list"><span class="cause-chip empty">Belum ada temuan</span></div>
-              <div id="recommendation" class="recommendation"><strong>Rekomendasi:</strong> Belum ada tindakan yang diperlukan.</div>
+              <div class="cause-title">AI-identified causes</div>
+              <div id="causeList" class="cause-list"><span class="cause-chip empty">No findings yet</span></div>
+              <div id="recommendation" class="recommendation"><strong>Recommendation:</strong> No action is required yet.</div>
             </div>
             <div class="card-head" style="border-top:1px solid var(--line); border-bottom:0; padding-bottom:12px;">
               <div>
-                <h3 class="card-title">Probabilitas Model</h3>
-                <p class="card-subtitle">Confidence tiap kelas dari frame terakhir.</p>
+                <h3 class="card-title">Model Probabilities</h3>
+                <p class="card-subtitle">Confidence for each class in the latest frame.</p>
               </div>
-              <span id="topPrediction" class="pill">Menunggu</span>
+              <span id="topPrediction" class="pill">Waiting</span>
             </div>
             <div id="probabilityList" class="prob-list"></div>
           </article>
@@ -404,10 +404,10 @@
           <article id="priority" class="card">
             <div class="card-head">
               <div>
-                <h3 class="card-title">Prioritas Kunjungan Petugas</h3>
-                <p class="card-subtitle">DARURAT ditempatkan paling atas, lalu SIAGA dan AMAN; penyebab AI menjadi informasi tindakan.</p>
+                <h3 class="card-title">Inspection Priorities</h3>
+                <p class="card-subtitle">EMERGENCY locations are ranked first, followed by ALERT and SAFE; AI-identified causes inform the response.</p>
               </div>
-              <button id="notifyBtn" class="btn btn-secondary">Aktifkan Notifikasi</button>
+              <button id="notifyBtn" class="btn btn-secondary">Enable Notifications</button>
             </div>
             <div id="priorityList" class="priority-list"></div>
           </article>
@@ -415,23 +415,23 @@
           <article id="history" class="card">
             <div class="card-head">
               <div>
-                <h3 class="card-title">Riwayat Temuan</h3>
-                <p class="card-subtitle">Perubahan level air dan deteksi AI dengan confidence ≥ 70% dicatat sementara.</p>
+                <h3 class="card-title">Detection History</h3>
+                <p class="card-subtitle">Water-level changes and AI detections with confidence ≥ 70% are recorded temporarily.</p>
               </div>
-              <button id="clearHistoryBtn" class="btn btn-secondary">Hapus</button>
+              <button id="clearHistoryBtn" class="btn btn-secondary">Clear</button>
             </div>
             <div class="table-wrap">
               <table>
                 <thead>
                   <tr>
-                    <th>Waktu</th>
-                    <th>Drainase</th>
-                    <th>Temuan</th>
+                    <th>Time</th>
+                    <th>Drainage</th>
+                    <th>Finding</th>
                     <th>Confidence</th>
                     <th>Status</th>
                   </tr>
                 </thead>
-                <tbody id="historyBody"><tr><td colspan="5" class="empty-row">Belum ada temuan.</td></tr></tbody>
+                <tbody id="historyBody"><tr><td colspan="5" class="empty-row">No findings yet.</td></tr></tbody>
               </table>
             </div>
           </article>
@@ -491,9 +491,9 @@
     ];
 
     const locations = [
-      { id: "ahmad-yani", name: "Drainase Jl. Ahmad Yani", lat: -7.3188, lng: 112.7342, note: "Titik demo koridor Surabaya Selatan" },
-      { id: "mayjen-sungkono", name: "Drainase Jl. Mayjen Sungkono", lat: -7.2916, lng: 112.7217, note: "Titik demo koridor Surabaya Barat" },
-      { id: "merr", name: "Drainase Jl. Ir. Soekarno (MERR)", lat: -7.2843, lng: 112.7819, note: "Titik demo koridor Surabaya Timur" }
+      { id: "ahmad-yani", name: "Drainage on Jl. Ahmad Yani", lat: -7.3188, lng: 112.7342, note: "Demo location in the South Surabaya corridor" },
+      { id: "mayjen-sungkono", name: "Drainage on Jl. Mayjen Sungkono", lat: -7.2916, lng: 112.7217, note: "Demo location in the West Surabaya corridor" },
+      { id: "merr", name: "Drainage on Jl. Ir. Soekarno (MERR)", lat: -7.2843, lng: 112.7819, note: "Demo location in the East Surabaya corridor" }
     ];
 
     const locationState = Object.fromEntries(locations.map(loc => [loc.id, {
@@ -539,6 +539,9 @@
       const mapped = [];
       labels.forEach(label => { const n = normalizeLabel(label); if (n && !mapped.includes(n)) mapped.push(n); });
       return ["Normal","Sampah","Eceng Gondok","Daun","Ranting","Lumpur","Vegetasi (Eceng Gondok/Daun)"].filter(x => mapped.includes(x));
+    }
+    function displayClass(name) {
+      return ({"Normal":"Normal", "Sampah":"Trash", "Eceng Gondok":"Water Hyacinth", "Daun":"Leaves", "Ranting":"Branches", "Lumpur":"Mud", "Vegetasi (Eceng Gondok/Daun)":"Vegetation (Water Hyacinth/Leaves)"})[name] || name;
     }
     function safeId(text) { return text.replace(/[^a-zA-Z0-9_-]/g, "-"); }
 
@@ -662,7 +665,7 @@
       ctx.fillStyle = "rgba(15,23,42,.82)";
       ctx.fillRect(14,14,boxW,40);
       ctx.fillStyle = status === "emergency" ? "#ef4444" : status === "standby" ? "#22c55e" : status === "safe" ? "#3b82f6" : "#cbd5e1";
-      ctx.fillText("AIR: " + label, 28, 40);
+      ctx.fillText("WATER: " + label, 28, 40);
       ctx.restore();
     }
     function updateWaterUI(pct, detected, status) {
@@ -671,23 +674,23 @@
         el(name + "LevelValue").textContent = `${val.toFixed(1)}%`;
       });
       const seen = [detected.blue && "BLUE", detected.green && "GREEN", detected.red && "RED"].filter(Boolean);
-      el("waterDetectionState").textContent = !isRunning ? "NORMAL / MENUNGGU KAMERA" : (seen.length ? seen.join(" + ") : "MARKER TIDAK TERBACA");
+      el("waterDetectionState").textContent = !isRunning ? "NORMAL / WAITING FOR CAMERA" : (seen.length ? seen.join(" + ") : "MARKER NOT READABLE");
     }
 
     // ============================================================
     // STATUS + PRIORITY
     // ============================================================
     function waterSeverity(status) { return ({ unknown:0, safe:1, standby:2, emergency:3 })[status] || 0; }
-    function waterStatusLabel(status) { return ({ unknown:"BELUM TERBACA", safe:"AMAN", standby:"SIAGA", emergency:"DARURAT" })[status] || "BELUM TERBACA"; }
+    function waterStatusLabel(status) { return ({ unknown:"NOT READ", safe:"SAFE", standby:"ALERT", emergency:"EMERGENCY" })[status] || "NOT READ"; }
     function markerColor(status) { return ({ unknown:"#94a3b8", safe:"#2563eb", standby:"#16a34a", emergency:"#dc2626" })[status] || "#94a3b8"; }
     function recommendationFor(state) {
       const causes = Object.keys(state.causes);
-      const causeText = causes.length ? causes.join(", ") : "belum ada penyebab yang teridentifikasi AI";
-      if (state.waterStatus === "emergency") return `Segera kirim petugas. Ketinggian air berada pada status DARURAT. Penyebab kamera: ${causeText}.`;
-      if (state.waterStatus === "standby") return `Masukkan lokasi ke daftar inspeksi prioritas. Ketinggian air SIAGA. Penyebab kamera: ${causeText}.`;
-      if (state.waterStatus === "safe" && causes.length) return `Ketinggian air masih AMAN, tetapi terdeteksi ${causeText}. Lakukan pembersihan preventif sebelum terjadi peningkatan muka air.`;
-      if (state.waterStatus === "safe") return "Ketinggian air AMAN dan belum ada penyebab penyumbatan signifikan yang terdeteksi.";
-      return "Marker ketinggian air belum terbaca dengan baik. Pastikan ROI dan tanda warna terlihat oleh kamera.";
+      const causeText = causes.length ? causes.map(displayClass).join(", ") : "no cause identified by AI yet";
+      if (state.waterStatus === "emergency") return `Dispatch personnel immediately. Water level status is EMERGENCY. Camera-identified causes: ${causeText}.`;
+      if (state.waterStatus === "standby") return `Add this location to the priority inspection list. Water level status is ALERT. Camera-identified causes: ${causeText}.`;
+      if (state.waterStatus === "safe" && causes.length) return `The water level is still SAFE, but the following was detected: ${causeText}. Perform preventive cleaning before the water level rises.`;
+      if (state.waterStatus === "safe") return "The water level is SAFE and no significant blockage cause has been detected.";
+      return "The water-level markers could not be read clearly. Ensure the ROI and colored markers are visible to the camera.";
     }
 
     function markerIcon(status) {
@@ -710,7 +713,7 @@
     function updateMarker(id) {
       const loc=locations.find(x=>x.id===id), state=locationState[id], marker=markers[id]; if(!loc||!state||!marker)return;
       const causes=Object.keys(state.causes); marker.setIcon(markerIcon(state.waterStatus));
-      marker.bindPopup(`<strong>${loc.name}</strong><br>${loc.note}<br>Status air: <strong>${waterStatusLabel(state.waterStatus)}</strong><br>Penyebab AI: ${causes.length?causes.join(", "):"Belum ada"}`);
+      marker.bindPopup(`<strong>${loc.name}</strong><br>${loc.note}<br>Water status: <strong>${waterStatusLabel(state.waterStatus)}</strong><br>AI-identified causes: ${causes.length?causes.map(displayClass).join(", "):"None yet"}`);
     }
     function renderLocationChips() {
       el("locationChips").innerHTML = locations.map(loc=>`<button class="location-chip ${loc.id===selectedLocationId?"active":""}" data-location="${loc.id}">${loc.name} · ${waterStatusLabel(locationState[loc.id].waterStatus)}</button>`).join("");
@@ -720,9 +723,9 @@
       const loc=currentLocation(), state=locationState[selectedLocationId], causes=Object.keys(state.causes), box=el("statusBox");
       box.className=`status-box ${state.waterStatus}`; box.textContent=waterStatusLabel(state.waterStatus);
       el("conditionLocation").textContent=loc.name;
-      el("conditionTitle").textContent = state.waterStatus === "unknown" ? "Menunggu pembacaan marker ketinggian air" : `Status ketinggian air: ${waterStatusLabel(state.waterStatus)}`;
-      el("causeList").innerHTML = causes.length ? causes.map(name=>`<span class="cause-chip">${CLASS_META[name]?.icon||"•"} ${name} · ${(state.causes[name]*100).toFixed(0)}%</span>`).join("") : `<span class="cause-chip empty">Belum ada penyebab penyumbatan terdeteksi</span>`;
-      el("recommendation").innerHTML=`<strong>Rekomendasi:</strong> ${recommendationFor(state)}`;
+      el("conditionTitle").textContent = state.waterStatus === "unknown" ? "Waiting for water-level marker readings" : `Water level status: ${waterStatusLabel(state.waterStatus)}`;
+      el("causeList").innerHTML = causes.length ? causes.map(name=>`<span class="cause-chip">${CLASS_META[name]?.icon||"•"} ${displayClass(name)} · ${(state.causes[name]*100).toFixed(0)}%</span>`).join("") : `<span class="cause-chip empty">No blockage cause detected yet</span>`;
+      el("recommendation").innerHTML=`<strong>Recommendation:</strong> ${recommendationFor(state)}`;
     }
     function renderPriority() {
       const sorted=[...locations].sort((a,b)=>{
@@ -731,7 +734,7 @@
       });
       el("priorityList").innerHTML=sorted.map((loc,idx)=>{
         const s=locationState[loc.id], causes=Object.keys(s.causes);
-        return `<div class="priority-item"><div class="rank">${idx+1}</div><div><p class="priority-name">${loc.name}</p><p class="priority-detail">Air: ${waterStatusLabel(s.waterStatus)} · ${causes.length?`Penyebab: ${causes.join(", ")}`:"Belum ada penyebab AI"}</p></div><span class="status-tag ${s.waterStatus}">${waterStatusLabel(s.waterStatus)}</span></div>`;
+        return `<div class="priority-item"><div class="rank">${idx+1}</div><div><p class="priority-name">${loc.name}</p><p class="priority-detail">Water: ${waterStatusLabel(s.waterStatus)} · ${causes.length?`Causes: ${causes.map(displayClass).join(", ")}`:"No AI-identified causes yet"}</p></div><span class="status-tag ${s.waterStatus}">${waterStatusLabel(s.waterStatus)}</span></div>`;
       }).join("");
     }
     function renderMetrics(){ const s=Object.values(locationState); el("metricEmergency").textContent=s.filter(x=>x.waterStatus==="emergency").length; el("metricStandby").textContent=s.filter(x=>x.waterStatus==="standby").length; el("metricSafe").textContent=s.filter(x=>x.waterStatus==="safe").length; }
@@ -740,23 +743,23 @@
     // ============================================================
     // AI MODEL
     // ============================================================
-    function renderProbabilityRows(labels){ el("probabilityList").innerHTML=labels.map(label=>`<div class="prob-row"><span class="prob-name">${label}</span><div class="bar"><span id="bar-${safeId(label)}"></span></div><span class="prob-value" id="value-${safeId(label)}">0%</span></div>`).join(""); }
+    function renderProbabilityRows(labels){ el("probabilityList").innerHTML=labels.map(label=>`<div class="prob-row"><span class="prob-name">${displayClass(label)}</span><div class="bar"><span id="bar-${safeId(label)}"></span></div><span class="prob-value" id="value-${safeId(label)}">0%</span></div>`).join(""); }
     function modelCompatibilityNotice(labels){
       const notice=el("modelNotice"), hasLegacy=labels.some(l=>["Tumbuhan","Plastik","Kertas"].includes(l)), hasFull=TARGET_CLASSES.every(l=>labels.includes(l));
       if(hasLegacy||hasFull){ notice.classList.remove("visible"); notice.innerHTML=""; return; }
-      notice.innerHTML="<strong>Model berhasil dimuat.</strong><br>Beberapa label model tidak dikenali dan akan diabaikan."; notice.classList.add("visible");
+      notice.innerHTML="<strong>Model loaded successfully.</strong><br>Some model labels are not recognized and will be ignored."; notice.classList.add("visible");
     }
     async function loadModel(){
-      if(model)return model; el("systemText").textContent="Memuat model...";
-      try{ model=await tmImage.load(MODEL_FILE,METADATA_FILE); modelLabels=model.getClassLabels?model.getClassLabels():[]; displayLabels=getDisplayLabels(modelLabels); renderProbabilityRows(displayLabels); modelCompatibilityNotice(modelLabels); el("systemDot").classList.add("online"); el("systemText").textContent="AI + water level siap"; return model; }
-      catch(err){ console.error(err); el("systemText").textContent="Model gagal dimuat"; el("modelNotice").textContent="Model tidak dapat dimuat. Jalankan via localhost/HTTPS dan pastikan folder model tersedia."; el("modelNotice").classList.add("visible"); throw err; }
+      if(model)return model; el("systemText").textContent="Loading model...";
+      try{ model=await tmImage.load(MODEL_FILE,METADATA_FILE); modelLabels=model.getClassLabels?model.getClassLabels():[]; displayLabels=getDisplayLabels(modelLabels); renderProbabilityRows(displayLabels); modelCompatibilityNotice(modelLabels); el("systemDot").classList.add("online"); el("systemText").textContent="AI + water level ready"; return model; }
+      catch(err){ console.error(err); el("systemText").textContent="Model failed to load"; el("modelNotice").textContent="Could not load the model. Run via localhost/HTTPS and ensure the model folder is available."; el("modelNotice").classList.add("visible"); throw err; }
     }
     function waitForVideoMetadata(video){
       return new Promise((resolve,reject)=>{
         if(video.readyState >= 1 && video.videoWidth) return resolve();
-        const timeout=setTimeout(()=>reject(new Error("Metadata kamera tidak tersedia.")),8000);
+        const timeout=setTimeout(()=>reject(new Error("Camera metadata is unavailable.")),8000);
         video.addEventListener("loadedmetadata",()=>{clearTimeout(timeout);resolve();},{once:true});
-        video.addEventListener("error",()=>{clearTimeout(timeout);reject(new Error("Video kamera gagal dimuat."));},{once:true});
+        video.addEventListener("error",()=>{clearTimeout(timeout);reject(new Error("Camera video failed to load."));},{once:true});
       });
     }
     function buildNativeCameraConstraints(){
@@ -785,10 +788,10 @@
       if(wrap && nativeW && nativeH) wrap.style.aspectRatio=`${nativeW} / ${nativeH}`;
     }
     async function startCamera(){
-      if(isRunning)return; startBtn.disabled=true; startBtn.textContent="Menyiapkan...";
+      if(isRunning)return; startBtn.disabled=true; startBtn.textContent="Preparing...";
       try{
         await loadModel();
-        if(!navigator.mediaDevices?.getUserMedia) throw new Error("Browser tidak mendukung getUserMedia().");
+        if(!navigator.mediaDevices?.getUserMedia) throw new Error("The browser does not support getUserMedia().");
 
         // Gunakan video native browser, BUKAN tmImage.Webcam. tmImage.Webcam melakukan crop ke canvas.
         cameraStream=await navigator.mediaDevices.getUserMedia(buildNativeCameraConstraints());
@@ -810,14 +813,14 @@
 
         isRunning=true;
         el("cameraPlaceholder").classList.add("hidden"); el("liveBadge").classList.add("visible"); el("cameraState").textContent="ONLINE";
-        startBtn.textContent="Kamera Aktif"; stopBtn.disabled=false; loop();
+        startBtn.textContent="Camera Active"; stopBtn.disabled=false; loop();
       }catch(err){
         console.error(err);
         stopCamera();
-        startBtn.disabled=false; startBtn.textContent="Mulai Kamera"; el("cameraState").textContent="OFFLINE";
+        startBtn.disabled=false; startBtn.textContent="Start Camera"; el("cameraState").textContent="OFFLINE";
         el("modelNotice").textContent = location.protocol==="file:"
-          ? "Akses kamera diblokir dari file://. Jalankan melalui localhost/HTTPS."
-          : `Kamera gagal dibuka: ${err.message||err}`;
+          ? "Camera access is blocked from file://. Run via localhost/HTTPS."
+          : `Unable to open camera: ${err.message||err}`;
         el("modelNotice").classList.add("visible");
       }
     }
@@ -828,7 +831,7 @@
       analysisCanvas=null; analysisCtx=null;
       el("webcam-container").innerHTML=""; el("waterOverlay").getContext("2d").clearRect(0,0,el("waterOverlay").width,el("waterOverlay").height);
       el("resolutionBadge").style.display="none";
-      el("cameraPlaceholder").classList.remove("hidden"); el("liveBadge").classList.remove("visible"); el("cameraState").textContent="OFFLINE"; startBtn.disabled=false; startBtn.textContent="Mulai Kamera"; stopBtn.disabled=true;
+      el("cameraPlaceholder").classList.remove("hidden"); el("liveBadge").classList.remove("visible"); el("cameraState").textContent="OFFLINE"; startBtn.disabled=false; startBtn.textContent="Start Camera"; stopBtn.disabled=true;
     }
     async function loop(){
       if(!isRunning||!cameraVideo||!analysisCanvas||!analysisCtx||!model)return;
@@ -844,7 +847,7 @@
       // Teachable Machine menerima HTMLVideoElement langsung. Preview tetap full-frame.
       const raw=await model.predict(cameraVideo), prediction=aggregatePredictions(raw);
       displayLabels.forEach(label=>{ const item=prediction.find(p=>p.className===label), pct=(item?.probability||0)*100, bar=el(`bar-${safeId(label)}`), val=el(`value-${safeId(label)}`); if(bar)bar.style.width=`${pct.toFixed(1)}%`; if(val)val.textContent=`${pct.toFixed(0)}%`; });
-      const best=prediction[0]||{className:"Normal",probability:0}; el("topPrediction").textContent=`${best.className} · ${(best.probability*100).toFixed(1)}%`; el("lastUpdated").textContent=new Date().toLocaleTimeString("id-ID",{hour:"2-digit",minute:"2-digit",second:"2-digit"}); collectDetection(best);
+      const best=prediction[0]||{className:"Normal",probability:0}; el("topPrediction").textContent=`${displayClass(best.className)} · ${(best.probability*100).toFixed(1)}%`; el("lastUpdated").textContent=new Date().toLocaleTimeString("en-US",{hour:"2-digit",minute:"2-digit",second:"2-digit"}); collectDetection(best);
     }
     function collectDetection(best){
       const now=Date.now(); detectionWindow=detectionWindow.filter(item=>now-item.time<=WINDOW_MS);
@@ -858,25 +861,25 @@
     // ============================================================
     function maybeLogDetection(best){
       const now=Date.now(), key=`${selectedLocationId}|AI|${best.className}`; if(key===lastLoggedKey&&now-lastLogTime<5000)return;
-      historyItems.unshift({time:new Date(),location:currentLocation().name,className:best.className,confidence:`${(best.probability*100).toFixed(1)}%`,status:waterStatusLabel(locationState[selectedLocationId].waterStatus)}); historyItems=historyItems.slice(0,40); lastLoggedKey=key; lastLogTime=now; renderHistory();
+      historyItems.unshift({time:new Date(),location:currentLocation().name,className:displayClass(best.className),confidence:`${(best.probability*100).toFixed(1)}%`,status:waterStatusLabel(locationState[selectedLocationId].waterStatus)}); historyItems=historyItems.slice(0,40); lastLoggedKey=key; lastLogTime=now; renderHistory();
     }
     function maybeLogWaterStatus(status,pct){
       if(status==="unknown"||status===lastLoggedWaterStatus)return; lastLoggedWaterStatus=status;
-      historyItems.unshift({time:new Date(),location:currentLocation().name,className:`Level Air ${waterStatusLabel(status)}`,confidence:`B ${pct.blue.toFixed(1)} · G ${pct.green.toFixed(1)} · R ${pct.red.toFixed(1)}`,status:waterStatusLabel(status)}); historyItems=historyItems.slice(0,40); renderHistory();
+      historyItems.unshift({time:new Date(),location:currentLocation().name,className:`Water Level ${waterStatusLabel(status)}`,confidence:`B ${pct.blue.toFixed(1)} · G ${pct.green.toFixed(1)} · R ${pct.red.toFixed(1)}`,status:waterStatusLabel(status)}); historyItems=historyItems.slice(0,40); renderHistory();
     }
     function renderHistory(){
-      if(!historyItems.length){el("historyBody").innerHTML='<tr><td colspan="5" class="empty-row">Belum ada temuan.</td></tr>';return;}
-      el("historyBody").innerHTML=historyItems.map(item=>`<tr><td>${item.time.toLocaleTimeString("id-ID")}</td><td>${item.location}</td><td><strong>${item.className}</strong></td><td>${item.confidence}</td><td>${item.status}</td></tr>`).join("");
+      if(!historyItems.length){el("historyBody").innerHTML='<tr><td colspan="5" class="empty-row">No findings yet.</td></tr>';return;}
+      el("historyBody").innerHTML=historyItems.map(item=>`<tr><td>${item.time.toLocaleTimeString("en-US")}</td><td>${item.location}</td><td><strong>${item.className}</strong></td><td>${item.confidence}</td><td>${item.status}</td></tr>`).join("");
     }
     function maybeAlert(){
       const loc=currentLocation(), state=locationState[selectedLocationId], banner=el("alertBanner");
       if(!["standby","emergency"].includes(state.waterStatus)){banner.classList.remove("visible");return;}
       const causes=Object.keys(state.causes); el("alertTitle").textContent=`${waterStatusLabel(state.waterStatus)} · ${loc.name}`;
-      el("alertText").textContent=`Ketinggian air ${waterStatusLabel(state.waterStatus)}.${causes.length?` Penyebab teridentifikasi: ${causes.join(", ")}.`:" Penyebab belum teridentifikasi AI."}`; banner.classList.add("visible");
+      el("alertText").textContent=`Water level ${waterStatusLabel(state.waterStatus)}.${causes.length?` Identified causes: ${causes.map(displayClass).join(", ")}.`:" No cause identified by AI yet."}`; banner.classList.add("visible");
       const now=Date.now(), key=`${selectedLocationId}-${state.waterStatus}`;
-      if(Notification.permission==="granted"&&(!lastNotification[key]||now-lastNotification[key]>30000)){ new Notification(`Drainase ${waterStatusLabel(state.waterStatus)} - Surabaya`,{body:`${loc.name}. ${causes.length?`Penyebab: ${causes.join(", ")}`:"Segera cek kondisi drainase."}`}); lastNotification[key]=now; }
+      if(Notification.permission==="granted"&&(!lastNotification[key]||now-lastNotification[key]>30000)){ new Notification(`Drainage ${waterStatusLabel(state.waterStatus)} - Surabaya`,{body:`${loc.name}. ${causes.length?`Causes: ${causes.map(displayClass).join(", ")}`:"Check the drainage condition immediately."}`}); lastNotification[key]=now; }
     }
-    async function enableNotifications(){ if(!("Notification" in window)){el("notifyBtn").textContent="Notifikasi tidak didukung";return;} const p=await Notification.requestPermission(); el("notifyBtn").textContent=p==="granted"?"Notifikasi Aktif":"Notifikasi Ditolak"; }
+    async function enableNotifications(){ if(!("Notification" in window)){el("notifyBtn").textContent="Notifications are not supported";return;} const p=await Notification.requestPermission(); el("notifyBtn").textContent=p==="granted"?"Notifications Enabled":"Notifications Denied"; }
 
     startBtn.addEventListener("click",startCamera); stopBtn.addEventListener("click",stopCamera); locationSelect.addEventListener("change",e=>setSelectedLocation(e.target.value));
     el("clearHistoryBtn").addEventListener("click",()=>{historyItems=[];renderHistory();}); el("notifyBtn").addEventListener("click",enableNotifications); window.addEventListener("beforeunload",stopCamera);
